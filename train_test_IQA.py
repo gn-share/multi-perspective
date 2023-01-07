@@ -5,18 +5,27 @@ import random
 import numpy as np
 from HyerIQASolver import HyperIQASolver
 
-main_path = os.environ['HOME']
+# main_path = os.environ['HOME']
 
 
 def main(config):
 
+    # The image file saving path needs to be set by yourself
+    # folder_path = {
+    #     'live': main_path + '/image_data/LIVE/',  #
+    #     'csiq': main_path + '/image_data/CSIQ/',  #
+    #     'tid2013': main_path + '/image_data/tid2013',
+    #     'livec': main_path + '/image_data/ChallengeDB_release/',  #
+    #     'koniq': main_path + '/image_data/koniq/',  #
+    #     'bid': main_path + '/image_data/BID/',  #
+    # }
     folder_path = {
-        'live': main_path + '/image_data/LIVE/',  #
-        'csiq': main_path + '/image_data/CSIQ/',  #
-        'tid2013': main_path + '/image_data/tid2013',
-        'livec': main_path + '/image_data/ChallengeDB_release/',  #
-        'koniq': main_path + '/image_data/koniq/',  #
-        'bid': main_path + '/image_data/BID/',  #
+        'live':   '/image_data/LIVE/',  #
+        'csiq':   '/image_data/CSIQ/',  #
+        'tid2013':   '/image_data/tid2013',
+        'livec':  '/image_data/ChallengeDB_release/',  #
+        'koniq':   '/image_data/koniq/',  #
+        'bid':   '/image_data/BID/',  #
     }
 
     img_num = {
@@ -41,6 +50,7 @@ def main(config):
     for i in range(config.train_test_num):
         print('Round %d' % (i+1))
         random.shuffle(sel_num)
+        # Randomly select 80% images for training and the rest for testing
         train_index = sel_num[0:int(round(0.8 * len(sel_num)))]
         test_index = sel_num[int(round(0.8 * len(sel_num))):len(sel_num)]
 
@@ -86,11 +96,17 @@ if __name__ == '__main__':
                         type=int, default=10, help='Train-test times')
     parser.add_argument('--beta', dest='beta',
                         type=float, default=0.3, help='beta control')
-
+    parser.add_argument('--cuda', dest='cuda',
+                        type=int, default=0, help='Choose which cuda to use')
+    parser.add_argument('--model1', dest='model1',
+                        type=str, default="res50", help='Support models: res18|res50|googlenet|vgg16')
+    parser.add_argument('--model2', dest='model2',
+                        type=str, default="res18", help='Support models: res18|res50|googlenet|vgg16')
     config = parser.parse_args()
+
     config.device = []
     config.num_workers = 3
-    cuda_number = [0,]
+    cuda_number = [config.cuda, config.cuda]
     config.num = len(cuda_number)
     for i in cuda_number:
         config.device.append(torch.device(f"cuda:{i:d}"))

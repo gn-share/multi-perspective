@@ -1,11 +1,9 @@
-from re import I
 import torch
 from scipy import stats
 import numpy as np
 import model_res50
 import model_res18
 import model_vgg
-import model_vgg_livec
 import model_go
 import model_target
 
@@ -22,18 +20,29 @@ class HyperIQASolver(object):
         self.device = config.device
         self.beta = config.beta
 
-        # 不同模型最后采用的学习率
-        self.lr = [config.lr,]
+        models_lr = {
+            "res50": config.lr,
+            "res18": config.lr,
+            "googlenet": config.lr*6,
+            "vgg16": config.lr*20,
+        }
+
+        models = {
+            "res50": model_res50.HyperNet(16, 112, 224, 112, 56, 28, 14, 7).to(self.device[0]),
+            "res18": model_res18.HyperNet(16, 112, 224, 112, 56, 28, 14, 7).to(self.device[0]),
+            "googlenet": model_vgg.HyperNet(16, 112, 224, 112, 56, 28, 14, 14).to(self.device[0]),
+            "vgg16": model_go.HyperNet(16, 112, 224, 112, 56, 28, 14, 7).to(self.device[0]),
+        }
+
+        # Learning rate finally adopted by different models
+        self.lr = [models_lr[config.model1], models_lr[config.model2], ]
 
         # model_res50.HyperNet(16, 112, 224, 112, 56, 28,14, 7).to(self.device[0]),         *1
         # model_res18.HyperNet(16, 112, 224, 112, 56, 28, 14, 7).to(self.device[0]),        *1
         # model_vgg.HyperNet(16, 112, 224, 112, 56, 28,14, 14).to(self.device[0]),          *20 live
-        # model_vgg_livec.HyperNet(16, 112, 224, 112, 56, 28,14, 7).to(self.device[0]),     *10 livec
         # model_go.HyperNet(16, 112, 224, 112, 56, 28,14, 7).to(self.device[0]), *12 live   *6 livec
-        
-        self.model_hyper = [
-            model_res50.HyperNet(16, 112, 224, 112, 56, 28,14, 7).to(self.device[0]), 
-        ]
+
+        self.model_hyper = [models[config.model1], models[config.model2], ]
 
         self.model_num = len(self.model_hyper)
 
@@ -58,6 +67,7 @@ class HyperIQASolver(object):
             self.solver.append(torch.optim.Adam(
                 paras, weight_decay=self.weight_decay))
 
+        # Load Data
         train_loader = data_loader.DataLoader(
             config.dataset, path, train_idx, config.patch_size, config.train_patch_num, batch_size=config.batch_size, istrain=True, num_workers=config.num_workers)
         test_loader = data_loader.DataLoader(
@@ -71,9 +81,9 @@ class HyperIQASolver(object):
         best_plcc = [0.0 for _ in range(self.model_num)]
         print('Epoch\tTrain_Loss\tTrain_SRCC\tTest_SRCC\tTest_PLCC')
         for t in range(self.epochs):
-            start_time=None
+            start_time = None
             if t == 0:
-                start_time = time.time()    
+                start_time = time.time()
             epoch_loss = []
             pred_scores = []
             gt_scores = []
@@ -97,7 +107,7 @@ class HyperIQASolver(object):
                     label_gpu.append(label.to(self.device[i]))
                     self.solver[i].zero_grad()
                 paras = []
-                # 为了让多个模型可以同时运行
+                # To enable multiple models to run simultaneously
                 for i in range(self.model_num):
                     paras.append(self.model_hyper[i](img_gpu[i]))
 
@@ -116,7 +126,7 @@ class HyperIQASolver(object):
                     except Exception:
                         pred_scores[i] = pred_scores[i] + \
                             [pred[i].cpu().item()]
-                # 通过循环来形成不同模型之间损失的计算，并将他们累加
+                # Calculate the losses between different models through circulation and accumulate them
                 diff_score = 0.0
 
                 for d_a in range(self.model_num):
@@ -134,7 +144,7 @@ class HyperIQASolver(object):
                     loss[i].backward()
                 for i in range(self.model_num):
                     self.solver[i].step()
-            # print(f"epoch {t} 训练结束用时为：{time.time()-start_time}")
+            # print(f"epoch {t} need time：{time.time()-start_time}")
             for i in range(self.model_num):
                 train_srcc[i], _ = stats.spearmanr(pred_scores[i], gt_scores)
 

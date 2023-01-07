@@ -16,6 +16,7 @@ model_urls = {
 
 
 class HyperNet(nn.Module):
+    
 
     def __init__(self, lda_out_channels, hyper_in_channels, target_in_size, target_fc1_size, target_fc2_size, target_fc3_size, target_fc4_size, feature_size):
         super(HyperNet, self).__init__()
