@@ -7,7 +7,9 @@ Before executing the code, you need to check whether the following python librar
 
 These libraries are in file requirements.txt
 You can install these libraries using the following command
--``` pip install -r requirements.txt ```
+``` 
+pip install -r requirements.txt 
+```
 
 
 # Image Database Path
