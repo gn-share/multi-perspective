@@ -83,7 +83,7 @@ if __name__ == '__main__':
     parser.add_argument('--test_patch_num', dest='test_patch_num', type=int,
                         default=25, help='Number of sample patches from testing image')
     parser.add_argument('--lr', dest='lr', type=float,
-                        default=1e-4, help='Learning rate')
+                        default=1e-5, help='Learning rate')
     parser.add_argument('--lrratio', dest='lrratio', type=int,
                         default=10, help='Learning rate ratio')
     parser.add_argument('--weight_decay', dest='weight_decay',
@@ -140,6 +140,7 @@ if __name__ == '__main__':
                 print(s, file=f, end=end)
         config.printf = printf
 
-    config.device = [try_gpu(i=config.cuda1), try_gpu(i=config.cuda2),try_gpu(i=config.cuda3)]
+    config.device = [try_gpu(i=config.cuda1), try_gpu(
+        i=config.cuda2), try_gpu(i=config.cuda3)]
     config.num_workers = num_workers[config.dataset]
     main(config)
