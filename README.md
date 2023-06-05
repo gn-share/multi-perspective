@@ -5,14 +5,10 @@ This is the source code for the paper "Blind image quality assessment via multi-
 
 Before executing the code, you need to check whether the following python libraries are installed.
 
-```
-Python 3.6+
-PyTorch 0.4+
-TorchVision
-scipy
-csv
-openpyxl
-```
+These libraries are in file requirements.txt
+You can install these libraries using the following command
+-``` pip install -r requirements.txt ```
+
 
 # Image Database Path
 In train_test_IQA.py file, you need to change image path.
@@ -43,4 +39,11 @@ Some available options:
 - ```--model2```: The model2 is assistant model. Training and testing model2, support models: res18|res50|googlenet|vgg16
 
 
+# Multi perspective evaluation only uses basic networks
+The code in named 'Base' folder.
+
+You can execute the code using the following command.
+```
+python main.py --name1 resnet18 --name2 resnet50
+```
 
