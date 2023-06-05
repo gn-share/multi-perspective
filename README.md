@@ -42,10 +42,19 @@ Some available options:
 
 
 # Multi perspective evaluation only uses basic networks
-The code in named 'Base' folder.
+
+The multi perspective scheme proposed by us can be implemented not only on two models, but also on three models. Of course, the more models there are, the more practice is required during the training process. The comparative experiment was conducted on a basic network.
+
+The Two Perspective code in named '2Perspective' folder.
 
 You can execute the code using the following command.
 ```
 python main.py --name1 resnet18 --name2 resnet50
 ```
 
+The Three Perspective code in named '3Perspective' folder.
+
+You can execute the code using the following command.
+```
+python main.py --name1 resnet18 --name2 resnet50 --name3 vgg16
+```
